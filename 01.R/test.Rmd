@@ -1,0 +1,124 @@
+---
+title: "test"
+author: "Shawn Wang"
+date: "1/29/2021"
+output: html_document
+---
+
+<font color = red> 我们看下Rmarkdown的输出交互结果</font>
+
+## 结果
+1. xxx  
+2. xxx  
+3. xxx  
+
+## 结论
+1. xxx  
+2. xxx  
+3. xxx  
+
+
+
+```{r PCA plot, echo=FALSE, message=FALSE, warning=FALSE}
+#################################
+#   Prj：Shawn Learn Bioinfo
+#   Date: Jan 29, 2021
+#   Author: Shawn Wang
+#################################
+options(stringsAsFactors = F)
+library(plotly)
+library(tidyverse)
+library(gmodels)
+##=============data cleaning=============
+x <- read.table("~/03.project/01.Heterosis/02.data/mRNA_readcount.xls",
+                header = T,
+                sep = "\t") %>% 
+  as_tibble() %>% 
+  select("transcript_id",contains("BtJ")) %>% 
+  rename_at(vars(contains("BtJ")),list(~ str_replace(.,"BtJ","Sample")))
+head(x)
+x = as.data.frame(x)
+## step1 condition
+condition = data.frame(Sample = colnames(x)[-1],
+                       Tissue = rep(c("fiber","leaf","ovule"),each = 3))
+## functions
+## 01.make trace
+maketrace = function(data,name){
+  trace <- list(
+    mode = "markers",
+    name = name,
+    type = "scatter3d",
+    x = as.numeric(filter(data,Type == name)$PC1),
+    y = as.numeric(filter(data,Type == name)$PC2),
+    z = as.numeric(filter(data,Type == name)$PC3)
+  )
+}
+## PCA plot
+PCA3DInteract = function(data,title){
+  ## 第一步清洗数据
+  rownames(data) = data[,1]
+  data = data[,-1]
+  ## 第二步 pca计算
+  pca.info = fast.prcomp(data)
+  
+  pca.data = data.frame(sample = condition$Sample,
+                        Type = condition$Tissue,
+                        pca.info$rotation)
+  ## 第三部制作trace
+  trace1 = maketrace(data = pca.data,name = "fiber")
+  trace2 = maketrace(data = pca.data,name = "leaf")
+  trace3 = maketrace(data = pca.data,name = "ovule")
+  data <- list(trace1, trace2,trace3)
+  layout <- list(
+    scene = list(
+      xaxis = list(
+        type = "linear", 
+        title = "PC1"
+      ), 
+      yaxis = list(
+        type = "linear", 
+        title = "PC2"
+      ), 
+      zaxis = list(
+        type = "linear", 
+        title = "PC3"
+      ), 
+      camera = list(
+        up = list(
+          x = 0, 
+          y = 0, 
+          z = 1
+        ), 
+        eye = list(
+          x = 0.7872575900178773, 
+          y = 0.9534734809221759, 
+          z = 1.5538414418639417
+        ), 
+        center = list(
+          x = 0, 
+          y = 0, 
+          z = 0
+        )
+      ), 
+      aspectmode = "auto", 
+      aspectratio = list(
+        x = 1.663724192127058, 
+        y = 0.7845820579507525, 
+        z = 0.7660908864950811
+      )
+    ), 
+    title = title, 
+    autosize = TRUE
+  )
+  
+  p <- plot_ly()
+  p <- add_trace(p, mode=trace1$mode, name=trace1$name, type=trace1$type, x=trace1$x, y=trace1$y, z=trace1$z)
+  p <- add_trace(p, mode=trace2$mode, name=trace2$name, type=trace2$type, x=trace2$x, y=trace2$y, z=trace2$z)
+  p <- add_trace(p, mode=trace3$mode, name=trace3$name, type=trace3$type, x=trace3$x, y=trace3$y, z=trace3$z)
+  layout(p, scene=layout$scene, title=layout$title, autosize=layout$autosize)
+}
+
+PCA3DInteract(data = x,title = "Tissue PCA")
+
+
+```
