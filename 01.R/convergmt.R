@@ -21,7 +21,7 @@ convertGMT = function(rawdata){
   x = data.frame(Gene_ID = rawdata[,1],
                  GOterm = paste(rawdata[,2],rawdata[,3],sep = "|"))
   head(x)
-  z = aggregate(x, by = list(x$GOterm), c) %>% transmute(GO_ID = .$Group.1, Gene_ID = .$Gene_ID)
+  z = aggregate(x, by = list(x$GOterm), c) %>% transmute(GO_ID = .$Group, Gene_ID = .$Gene_ID)
   View(z)
   tmp1 = data.frame(GO_ID = z$GO_ID,
                     Gene_ID = 0)

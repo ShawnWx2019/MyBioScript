@@ -21,7 +21,7 @@ if (length(args)>=2) {
 httr::POST(
   url = "http://revigo.irb.hr/StartJob.aspx",
   body = list(
-    cutoff = "0.5",
+    cutoff = "0",
     valueType = "pvalue",
     speciesTaxon = "0",
     measure = "SIMREL",

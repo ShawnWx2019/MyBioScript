@@ -16,7 +16,7 @@ done
 
 # Fetch results
 # bp
-curl "http://revigo.irb.hr/ExportJob.aspx" -X POST --silent --data-urlencode "jobid=$jobid" --data-urlencode "namespace=1" --data-urlencode "type=csvtable" > bp.$2.csv
+curl "http://revigo.irb.hr/ExportJob.aspx" -X POST --silent --data-urlencode "jobid=$jobid" --data-urlencode "namespace=1" --data-urlencode "type=csvtable" >bp.$2.csv
 curl "http://revigo.irb.hr/ExportJob.aspx" -X POST --silent --data-urlencode "jobid=$jobid" --data-urlencode "namespace=1" --data-urlencode "type=rtable" > bp.$2.r
 curl "http://revigo.irb.hr/ExportJob.aspx" -X POST --silent --data-urlencode "jobid=$jobid" --data-urlencode "namespace=1" --data-urlencode "type=xgmml" > bp.$2.xgmml
 # cc

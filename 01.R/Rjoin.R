@@ -11,7 +11,8 @@ command=matrix(c(
   'method', 'm', 1, 'character', 'JoinMethod: left, right, inner, full; default: left(equals excel vlookup)',
   'left', 'x', 1, 'character', 'left_file: the 1st file',
   'right', 'y', 1, 'character', 'right_file: the 2nd file',
-  'key', 'k', 1, 'character', 'key(by): the colnames of key columns, makesure leftfile and rightfile have the same colnames of key column'
+  'key', 'k', 1, 'character', 'key(by): the colnames of key columns, makesure leftfile and rightfile have the same colnames of key column',
+  'out', 'o',1, 'character', 'output name'
 ),byrow = T, ncol = 5)
 args = getopt(command)
 
@@ -33,13 +34,15 @@ method <- args$method
 left <- args$left
 right <- args$right
 key <- args$key
-
-Rjoin = function(method,left,right,key){
+out <- args$out
+Rjoin = function(method,left,right,key,out){
   ## input data
   x = read.delim(file = left, header = T,
                  sep = "\t", quote = NULL)
+  x = data.frame(x)
   y = read.delim(file = right, header = T,
                  sep = "\t", quote = NULL)
+  y = data.frame(y)
   ## join
   if (method == "left") {
     z = left_join(x,y, by = key)
@@ -51,7 +54,7 @@ Rjoin = function(method,left,right,key){
     z = full_join(x,y, by = key)
   } 
   ## output
-  write.table(z,file = paste(left,right,method,key,".xls",sep = "_"),
+  write.table(z,file = paste0(out,".xls"),
               sep = "\t",
               quote = F,
               row.names = F)
@@ -60,7 +63,8 @@ Rjoin = function(method,left,right,key){
 Rjoin(method = method,
       left = left,
       right = right,
-      key = key)
+      key = key,
+      out = out)
 
 
 

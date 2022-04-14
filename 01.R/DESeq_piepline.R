@@ -34,7 +34,7 @@ if (is.null(args$pvalue)){
 }
 
 if (is.null(args$qvalue)){
-  args$samplePerc = 1
+  args$qvalue = 1
 }
 
 if (is.null(args$log2fc)){
@@ -92,7 +92,7 @@ countB = rawcount[,B]
 name = c(left,right)
 ## DE analysis
 count = cbind(countA,countB)
-info = data.frame(sample = names(count),cultivar = rep(name,times = c(3,3)))
+info = data.frame(sample = names(count),cultivar = rep(name,times = c(ncol(countA),ncol(countB))))
 dds <- DESeqDataSetFromMatrix( countData = round(count,0), colData =info, design = ~ cultivar)
 res = results(DESeq(dds),contrast = c("cultivar",left,right))
 res = data.frame(GeneID = rownames(res),res)
