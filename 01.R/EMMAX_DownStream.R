@@ -20,7 +20,7 @@ msg_no = red$bold$italic
 msg_run = blue$bold$italic$underline
 msg_warning = yellow$bold$italic
 message(msg_yes(
-  paste0("#=========================================================#\n",
+  paste0("\n#=========================================================#\n",
          "#        Prj: EMMAX-mate ver 0.0.1\n",
          "#        Assignment: Visualization and sig SNP extract\n",
          "#        Author: Shawn Wang <shawnwang2016@126.com>\n",
