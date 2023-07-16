@@ -36,7 +36,9 @@ command=matrix(c(
   'annotation', 'a', 2, 'character','SNP annotation',
   'out_filename', 'o', 2, 'character', 'input metadata file: compound metadata, include compound annotations',
   'cutoff', 'f', 2, 'integer', '-log10P cutoff,default = 4',
-  'img_type', 'i', 2, 'character', 'output file type. jpg, pdf or '
+  'img_type', 'i', 2, 'character', 'output file type. jpg, pdf or ',
+  'point_size', 's', 2, 'character', 'The point size of 0-4-6 ',
+  'point_color', 'w', 2, 'character', 'The point color of 4-6  '
 ),byrow = T, ncol = 5)
 args = getopt(command)
 
@@ -73,6 +75,14 @@ if (is.null(args$img_type)){
   message(msg_warning("default img file type: jpg."))
   args$img_type = "jpg"
 }
+if (is.null(args$point_size)){
+  message(msg_warning("default point size: 0.3_0.5_0.5."))
+  args$point_size = "0.3_0.5_0.5"
+}
+if (is.null(args$point_color)){
+  message(msg_warning("default point color: red_green."))
+  args$point_color = "red_green"
+}
 # library for data cleaning and visualize ---------------------------------
 suppressMessages(if (!require('tidyverse')) install.packages('tidyverse'))
 suppressMessages(if (!require('CMplot')) install.packages('CMplot'))
@@ -82,8 +92,10 @@ if(TEST == "TRUE") {
   trait = "Morin"
   out_filename = "Morin_QK"
   cutoff = 4
-  annotation = "~/GeekCloud/01.Database/Gh_383_anno_clean.xls"
+  annotation = ""
   img_type = "jpg"
+  point_size = "0.3_0.5_0.5."
+  point_color = "red_green"
 } else {
   emmax_ps = args$emmax_ps
   trait = args$trait
@@ -91,6 +103,8 @@ if(TEST == "TRUE") {
   cutoff = args$cutoff
   annotation = args$annotation
   img_type = args$img_type
+  point_size = args$point_size %>% stringr::str_split(.,"_",3,T) %>% as.numeric()
+  point_color = args$point_color %>% stringr::str_split(.,"_",2,T) 
 }
 
 # run ---------------------------------------------------------------------
@@ -110,14 +124,17 @@ message(msg_run("Step1. Start drawing QQ plot and Manhattan plot ..."))
 message(msg_yes("\n-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-\n"))
 clean <-
   raw %>%
-  setNames(c("SNP","SE",trait)) %>%
+  setNames(c("SNP","SE","pval")) %>%
   mutate(Chromosome = stringr::str_split(SNP,":",2,T)[,1],
          Position = stringr::str_split(SNP,":",2,T)[,2] %>% as.numeric()) %>%
-  select(SNP,Chromosome,Position,trait)
+  select(SNP,Chromosome,Position,pval) %>%
+  filter(pval > 0 & pval <= 1) %>%
+  set_names("SNP","Chromosome","Position",trait)
 anno <-
   anno %>%
+  select(Uploaded_variation,Feature_type,Gene,Consequence,Amino_acids,Codons,IMPACT) %>% 
   setNames(
-    c("SNP","Feature_type","Consequence","aa_variation","Codons","Impact")
+    c("SNP","Feature_type","Gene","Consequence","aa_variation","Codons","Impact")
   ) %>%
   mutate(
     Chromosome = stringr::str_split(SNP,":",2,T)[,1],
@@ -131,8 +148,8 @@ CMplot(clean,plot.type="q",conf.int.col=NULL,box=TRUE,file=img_type,memo="",dpi=
 message(msg_run("Manhattan plot ..."))
 CMplot(clean, plot.type="m", LOG10=TRUE, ylim=NULL, threshold=c(1e-6,1e-4),threshold.lty=c(1,2),
        threshold.lwd=c(1,1), threshold.col=c("black","grey"), amplify=TRUE,bin.size=1e6,
-       chr.den.col=c("darkgreen", "yellow", "red"),signal.col=c("red","green"),signal.cex=c(.3,.3),
-       signal.pch=c(19,19),file=img_type,memo="",dpi=300,file.output=TRUE,verbose=TRUE,cex = .2,
+       chr.den.col=c("darkgreen", "yellow", "red"),signal.col=c(point_color[2],point_color[1]),signal.cex=c(point_size[3],point_size[1]),
+       signal.pch=c(19,19),file=img_type,memo="",dpi=300,file.output=TRUE,verbose=TRUE,cex = point_size[1],
        width=22,height=8)
 message(msg_yes("Step1 finish!"))
 
